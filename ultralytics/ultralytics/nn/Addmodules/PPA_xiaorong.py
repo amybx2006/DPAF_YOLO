@@ -1,10 +1,3 @@
-'''
-Author: 刘晨
-Date: 2026-6-17
-Description:做PPA模块消融实验时，PPA_xiaorong.py替换为PPA.py
-
-Copyright (c) 2026 by 刘晨11, All Rights Reserved.
-'''
 import math
 import torch
 import torch.nn as nn
