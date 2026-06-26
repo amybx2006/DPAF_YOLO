@@ -1,15 +1,6 @@
-# DPAF-YOLO: 小目标检测优化方案
+# DPAF-YOLO: A Detail-Preserving Asymptotic Feature Fusion Network for Small UAV Detection in Low-Altitude Optical Remote Sensing
 
-基于 YOLO11 的小目标检测改进模型，集成了 PPA (Position-Priority Attention) 和 DASI (Dynamic Adaptive Scale Interaction) 模块，显著提升小目标检测性能。
-
-## �� 核心亮点
-
-- **PPA (Position-Priority Attention)**：位置优先级注意力机制，增强对小目标特征的捕捉能力
-- **DASI (Dynamic Adaptive Scale Interaction)**：动态自适应尺度交互模块，优化多尺度特征融合
-- **ASFF (Adaptively Spatial Feature Fusion)**：自适应空间特征融合，提升特征表达能力
-- **单类别检测优化**：针对小目标检测场景专门优化
-
-## �� 项目结构
+## Project Structure
 
 ```
 DPAF_YOLO/
@@ -18,37 +9,37 @@ DPAF_YOLO/
 │   │   ├── cfg/
 │   │   │   ├── models/
 │   │   │   │   └── 11/
-│   │   │   │       ├── yolo11s.yaml          # 原始 YOLO11s 模型
-│   │   │   │       ├── yolo11s_DASI.yaml     # DASI 模块版本
-│   │   │   │       └── yolo11s_PPA_DASI.yaml # PPA + DASI 完整版本 (核心模型)
+│   │   │   │       ├── yolo11s.yaml          # Original YOLO11s model
+│   │   │   │       ├── yolo11s_DASI.yaml     # DASI module version
+│   │   │   │       └── yolo11s_PPA_DASI.yaml # PPA + DASI full version (core model)
 │   │   │   └── datasets/
-│   │   │       └── DUT.yaml                  # 数据集配置文件
-│   │   ├── runs/                             # 训练结果目录
+│   │   │       └── DUT.yaml                  # Dataset configuration file
+│   │   ├── runs/                             # Training results directory
 │   │   │   ├── weights/
-│   │   │   │   ├── best.pt                   # 最佳权重
-│   │   │   │   └── last.pt                   # 最后训练权重
-│   │   │   └── args.yaml                     # 训练参数记录
+│   │   │   │   ├── best.pt                   # Best weights
+│   │   │   │   └── last.pt                   # Last training weights
+│   │   │   └── args.yaml                     # Training parameters record
 │   │   └── ...
-│   ├── train.py                              # 训练入口
-│   ├── predict.py                            # 推理入口
-│   └── pyproject.toml                        # 项目依赖
-└── README.md                                 # 项目说明文档
+│   ├── train.py                              # Training entry
+│   ├── predict.py                            # Inference entry
+│   └── pyproject.toml                        # Project dependencies
+└── README.md                                 # Project documentation
 ```
 
-## ��️ 环境要求
+## 🛠️ Environment Requirements
 
 ```bash
-# 安装依赖
+# Install dependencies
 cd ultralytics
 pip install -e .
 
-# 或直接安装 ultralytics
+# Or install ultralytics directly
 pip install ultralytics>=8.2.0
 ```
 
-## �� 数据集准备
+## Dataset Preparation
 
-### 数据集结构
+### Dataset Structure
 
 ```
 ultralytics/datasets/DUT/
@@ -67,30 +58,30 @@ ultralytics/datasets/DUT/
     └── labels/
 ```
 
-### 创建 DUT.yaml 配置文件
+### Create DUT.yaml Configuration
 
-在 `ultralytics/ultralytics/cfg/datasets/` 目录下创建 `DUT.yaml`：
+Create `DUT.yaml` in `ultralytics/ultralytics/cfg/datasets/`:
 
 ```yaml
-path: ../datasets/DUT  # 数据集根目录
-train: train/images     # 训练集图片路径
-val: val/images         # 验证集图片路径
-test: test/images       # 测试集图片路径
+path: ../datasets/DUT  # Dataset root directory
+train: train/images     # Training set images path
+val: val/images         # Validation set images path
+test: test/images       # Test set images path
 
-# 类别定义
+# Class definitions
 names:
-  0: small_object  # 小目标类别
+  0: small_uav  # Small UAV class
 
-# 类别数量
+# Number of classes
 nc: 1
 ```
 
-## �� 训练与评估
+## Training and Evaluation
 
-### 训练命令
+### Training Commands
 
 ```bash
-# 使用默认参数训练
+# Train with default parameters
 cd ultralytics
 python train.py --model ultralytics/cfg/models/11/yolo11s_PPA_DASI.yaml \
                 --data ultralytics/cfg/datasets/DUT.yaml \
@@ -100,538 +91,102 @@ python train.py --model ultralytics/cfg/models/11/yolo11s_PPA_DASI.yaml \
                 --optimizer Adam \
                 --device 0
 
-# 恢复训练
+# Resume training
 python train.py --resume runs/detect/train89/weights/last.pt
 ```
 
-### 关键训练参数
+### Key Training Parameters
 
-| 参数 | 值 | 说明 |
-|------|-----|------|
-| `--epochs` | 150 | 训练轮数 |
-| `--batch` | 32 | 批次大小 |
-| `--imgsz` | 640 | 输入图像尺寸 |
-| `--optimizer` | Adam | 优化器 |
-| `--device` | 0 | GPU 设备编号 |
-| `--lr0` | 0.001 | 初始学习率 |
-| `--close_mosaic` | 10 | 最后 10 轮关闭 Mosaic 增强 |
+| Parameter | Value | Description |
+|-----------|-------|-------------|
+| `--epochs` | 150 | Number of training epochs |
+| `--batch` | 32 | Batch size |
+| `--imgsz` | 640 | Input image size |
+| `--optimizer` | Adam | Optimizer type |
+| `--device` | 0 | GPU device index |
+| `--lr0` | 0.001 | Initial learning rate |
+| `--close_mosaic` | 10 | Close mosaic augmentation in last 10 epochs |
 
-### 评估命令
+### Evaluation Commands
 
 ```bash
-# 验证模型
+# Validate model
 python val.py --model runs/detect/train89/weights/best.pt \
               --data ultralytics/cfg/datasets/DUT.yaml
 
-# 生成混淆矩阵和指标报告
+# Generate confusion matrix and metrics report
 python val.py --model runs/detect/train89/weights/best.pt \
               --data ultralytics/cfg/datasets/DUT.yaml \
               --save_json
 ```
 
-## �� 推理预测
+## Inference and Prediction
 
 ```bash
-# 单张图片推理
+# Single image inference
 python predict.py --model runs/detect/train89/weights/best.pt \
                   --source test.jpg \
                   --save-crop
 
-# 批量图片推理
+# Batch image inference
 python predict.py --model runs/detect/train89/weights/best.pt \
                   --source test_images/ \
                   --save-txt
 
-# 视频推理
+# Video inference
 python predict.py --model runs/detect/train89/weights/best.pt \
                   --source input.mp4 \
                   --save-video
 ```
 
-## ⚠️ 重要说明
+## ⚠️ Important Notes
 
-### 数据集配置
+### Dataset Configuration
 
-使用前请确保已创建 `ultralytics/ultralytics/cfg/datasets/DUT.yaml` 数据集配置文件，并根据实际数据集路径进行修改。
+Ensure that `ultralytics/ultralytics/cfg/datasets/DUT.yaml` is created with the correct paths to your dataset before training.
 
-### 权重文件
+### Weight Files
 
-训练结果权重保存在 `ultralytics/runs/weights/` 目录：
-- `best.pt`: 验证集性能最佳的权重
-- `last.pt`: 最后一轮训练的权重
+Training results are saved in `ultralytics/runs/weights/`:
+- `best.pt`: Best performing weights on validation set
+- `last.pt`: Last epoch training weights
 
-### 训练参数记录
+### Training Parameters Record
 
-`ultralytics/runs/args.yaml` 文件记录了训练时的所有参数配置，路径已修改为相对路径便于共享。
+The `ultralytics/runs/args.yaml` file records all training parameters. Paths have been converted to relative paths for easy sharing.
 
-## �� 模型架构
+## Model Architecture
 
 ```
-输入图像 (640x640)
-        \u2193
+Input Image (640x640)
+        ↓
     Backbone
-        \u251c\u2500\u2500 Conv + PPA (P1/2)
-        \u251c\u2500\u2500 C3k2 + PPA (P2/4)
-        \u251c\u2500\u2500 C3k2 + PPA (P3/8)
-        \u251c\u2500\u2500 C3k2 (P4/16)
-        \u2514\u2500\u2500 C3k2 + SPPF + C2PSA (P5/32)
-        \u2193
+        ├── Conv + PPA (P1/2)
+        ├── C3k2 + PPA (P2/4)
+        ├── C3k2 + PPA (P3/8)
+        ├── C3k2 (P4/16)
+        ├── C3k2 + SPPF + C2PSA (P5/32)
+        ↓
     Neck (ASFF + DASI)
-        \u251c\u2500\u2500 ASFF2 (P3-P4 融合)
-        \u251c\u2500\u2500 ASFF3 (P3-P5 融合)
-        \u2514\u2500\u2500 DASI (动态尺度交互)
-        \u2193
+        ├── ASFF2 (P3-P4 Fusion)
+        ├── ASFF3 (P3-P5 Fusion)
+        └── DASI (Dynamic Scale Interaction)
+        ↓
     Head (Detect)
-        \u2514\u2500\u2500 输出检测结果
+        └── Output Detection Results
 ```
 
-## �� 训练结果
+## Training Results
 
-训练过程中生成的可视化结果保存在 `ultralytics/runs/` 目录：
-- `results.png`: 训练损失曲线
-- `F1_curve.png`: F1 曲线
-- `PR_curve.png`: PR 曲线
-- `train_batch*.jpg`: 训练批次可视化
-- `val_batch*_labels.jpg`: 验证集标签可视化
-- `val_batch*_pred.jpg`: 验证集预测结果可视化
+Visualization results are saved in `ultralytics/runs/`:
+- `results.png`: Training loss curves
+- `F1_curve.png`: F1 score curves
+- `PR_curve.png`: Precision-Recall curves
+- `train_batch*.jpg`: Training batch visualizations
+- `val_batch*_labels.jpg`: Validation set label visualizations
+- `val_batch*_pred.jpg`: Validation set prediction visualizations
 
-## �� 引用
 
-如果您在研究中使用了本项目，请引用：
+## License
 
-```bibtex
-@article{DPAF-YOLO,
-  title={DPAF-YOLO: Position-Priority Attention with Dynamic Adaptive Scale Interaction for Small Object Detection},
-  author={Your Name},
-  journal={arXiv preprint arXiv:XXXX.XXXXX},
-  year={2024}
-}
-```
-
-## �� 许可证
-
-本项目基于 [AGPL-3.0](ultralytics/LICENSE) 许可证。# DPAF-YOLO: 小目标检测优化方案
-
-基于 YOLO11 的小目标检测改进模型，集成了 PPA (Position-Priority Attention) 和 DASI (Dynamic Adaptive Scale Interaction) 模块，显著提升小目标检测性能。
-
-## �� 核心亮点
-
-- **PPA (Position-Priority Attention)**：位置优先级注意力机制，增强对小目标特征的捕捉能力
-- **DASI (Dynamic Adaptive Scale Interaction)**：动态自适应尺度交互模块，优化多尺度特征融合
-- **ASFF (Adaptively Spatial Feature Fusion)**：自适应空间特征融合，提升特征表达能力
-- **单类别检测优化**：针对小目标检测场景专门优化
-
-## �� 项目结构
-
-```
-DPAF_YOLO/
-├── ultralytics/
-│   ├── ultralytics/
-│   │   ├── cfg/
-│   │   │   ├── models/
-│   │   │   │   └── 11/
-│   │   │   │       ├── yolo11s.yaml          # 原始 YOLO11s 模型
-│   │   │   │       ├── yolo11s_DASI.yaml     # DASI 模块版本
-│   │   │   │       └── yolo11s_PPA_DASI.yaml # PPA + DASI 完整版本 (核心模型)
-│   │   │   └── datasets/
-│   │   │       └── DUT.yaml                  # 数据集配置文件
-│   │   ├── runs/                             # 训练结果目录
-│   │   │   ├── weights/
-│   │   │   │   ├── best.pt                   # 最佳权重
-│   │   │   │   └── last.pt                   # 最后训练权重
-│   │   │   └── args.yaml                     # 训练参数记录
-│   │   └── ...
-│   ├── train.py                              # 训练入口
-│   ├── predict.py                            # 推理入口
-│   └── pyproject.toml                        # 项目依赖
-└── README.md                                 # 项目说明文档
-```
-
-## ��️ 环境要求
-
-```bash
-# 安装依赖
-cd ultralytics
-pip install -e .
-
-# 或直接安装 ultralytics
-pip install ultralytics>=8.2.0
-```
-
-## �� 数据集准备
-
-### 数据集结构
-
-```
-ultralytics/datasets/DUT/
-├── train/
-│   ├── images/
-│   │   ├── img_001.jpg
-│   │   └── ...
-│   └── labels/
-│       ├── img_001.txt
-│       └── ...
-├── val/
-│   ├── images/
-│   └── labels/
-└── test/
-    ├── images/
-    └── labels/
-```
-
-### 创建 DUT.yaml 配置文件
-
-在 `ultralytics/ultralytics/cfg/datasets/` 目录下创建 `DUT.yaml`：
-
-```yaml
-path: ../datasets/DUT  # 数据集根目录
-train: train/images     # 训练集图片路径
-val: val/images         # 验证集图片路径
-test: test/images       # 测试集图片路径
-
-# 类别定义
-names:
-  0: small_object  # 小目标类别
-
-# 类别数量
-nc: 1
-```
-
-## �� 训练与评估
-
-### 训练命令
-
-```bash
-# 使用默认参数训练
-cd ultralytics
-python train.py --model ultralytics/cfg/models/11/yolo11s_PPA_DASI.yaml \
-                --data ultralytics/cfg/datasets/DUT.yaml \
-                --epochs 150 \
-                --batch 32 \
-                --imgsz 640 \
-                --optimizer Adam \
-                --device 0
-
-# 恢复训练
-python train.py --resume runs/detect/train89/weights/last.pt
-```
-
-### 关键训练参数
-
-| 参数 | 值 | 说明 |
-|------|-----|------|
-| `--epochs` | 150 | 训练轮数 |
-| `--batch` | 32 | 批次大小 |
-| `--imgsz` | 640 | 输入图像尺寸 |
-| `--optimizer` | Adam | 优化器 |
-| `--device` | 0 | GPU 设备编号 |
-| `--lr0` | 0.001 | 初始学习率 |
-| `--close_mosaic` | 10 | 最后 10 轮关闭 Mosaic 增强 |
-
-### 评估命令
-
-```bash
-# 验证模型
-python val.py --model runs/detect/train89/weights/best.pt \
-              --data ultralytics/cfg/datasets/DUT.yaml
-
-# 生成混淆矩阵和指标报告
-python val.py --model runs/detect/train89/weights/best.pt \
-              --data ultralytics/cfg/datasets/DUT.yaml \
-              --save_json
-```
-
-## �� 推理预测
-
-```bash
-# 单张图片推理
-python predict.py --model runs/detect/train89/weights/best.pt \
-                  --source test.jpg \
-                  --save-crop
-
-# 批量图片推理
-python predict.py --model runs/detect/train89/weights/best.pt \
-                  --source test_images/ \
-                  --save-txt
-
-# 视频推理
-python predict.py --model runs/detect/train89/weights/best.pt \
-                  --source input.mp4 \
-                  --save-video
-```
-
-## ⚠️ 重要说明
-
-### 数据集配置
-
-使用前请确保已创建 `ultralytics/ultralytics/cfg/datasets/DUT.yaml` 数据集配置文件，并根据实际数据集路径进行修改。
-
-### 权重文件
-
-训练结果权重保存在 `ultralytics/runs/weights/` 目录：
-- `best.pt`: 验证集性能最佳的权重
-- `last.pt`: 最后一轮训练的权重
-
-### 训练参数记录
-
-`ultralytics/runs/args.yaml` 文件记录了训练时的所有参数配置，路径已修改为相对路径便于共享。
-
-## �� 模型架构
-
-```
-输入图像 (640x640)
-        \u2193
-    Backbone
-        \u251c\u2500\u2500 Conv + PPA (P1/2)
-        \u251c\u2500\u2500 C3k2 + PPA (P2/4)
-        \u251c\u2500\u2500 C3k2 + PPA (P3/8)
-        \u251c\u2500\u2500 C3k2 (P4/16)
-        \u2514\u2500\u2500 C3k2 + SPPF + C2PSA (P5/32)
-        \u2193
-    Neck (ASFF + DASI)
-        \u251c\u2500\u2500 ASFF2 (P3-P4 融合)
-        \u251c\u2500\u2500 ASFF3 (P3-P5 融合)
-        \u2514\u2500\u2500 DASI (动态尺度交互)
-        \u2193
-    Head (Detect)
-        \u2514\u2500\u2500 输出检测结果
-```
-
-## �� 训练结果
-
-训练过程中生成的可视化结果保存在 `ultralytics/runs/` 目录：
-- `results.png`: 训练损失曲线
-- `F1_curve.png`: F1 曲线
-- `PR_curve.png`: PR 曲线
-- `train_batch*.jpg`: 训练批次可视化
-- `val_batch*_labels.jpg`: 验证集标签可视化
-- `val_batch*_pred.jpg`: 验证集预测结果可视化
-
-## �� 引用
-
-如果您在研究中使用了本项目，请引用：
-
-```bibtex
-@article{DPAF-YOLO,
-  title={DPAF-YOLO: Position-Priority Attention with Dynamic Adaptive Scale Interaction for Small Object Detection},
-  author={Your Name},
-  journal={arXiv preprint arXiv:XXXX.XXXXX},
-  year={2024}
-}
-```
-
-## �� 许可证
-
-本项目基于 [AGPL-3.0](ultralytics/LICENSE) 许可证。# DPAF-YOLO: 小目标检测优化方案
-
-基于 YOLO11 的小目标检测改进模型，集成了 PPA (Position-Priority Attention) 和 DASI (Dynamic Adaptive Scale Interaction) 模块，显著提升小目标检测性能。
-
-## �� 核心亮点
-
-- **PPA (Position-Priority Attention)**：位置优先级注意力机制，增强对小目标特征的捕捉能力
-- **DASI (Dynamic Adaptive Scale Interaction)**：动态自适应尺度交互模块，优化多尺度特征融合
-- **ASFF (Adaptively Spatial Feature Fusion)**：自适应空间特征融合，提升特征表达能力
-- **单类别检测优化**：针对小目标检测场景专门优化
-
-## �� 项目结构
-
-```
-DPAF_YOLO/
-├── ultralytics/
-│   ├── ultralytics/
-│   │   ├── cfg/
-│   │   │   ├── models/
-│   │   │   │   └── 11/
-│   │   │   │       ├── yolo11s.yaml          # 原始 YOLO11s 模型
-│   │   │   │       ├── yolo11s_DASI.yaml     # DASI 模块版本
-│   │   │   │       └── yolo11s_PPA_DASI.yaml # PPA + DASI 完整版本 (核心模型)
-│   │   │   └── datasets/
-│   │   │       └── DUT.yaml                  # 数据集配置文件
-│   │   ├── runs/                             # 训练结果目录
-│   │   │   ├── weights/
-│   │   │   │   ├── best.pt                   # 最佳权重
-│   │   │   │   └── last.pt                   # 最后训练权重
-│   │   │   └── args.yaml                     # 训练参数记录
-│   │   └── ...
-│   ├── train.py                              # 训练入口
-│   ├── predict.py                            # 推理入口
-│   └── pyproject.toml                        # 项目依赖
-└── README.md                                 # 项目说明文档
-```
-
-## ��️ 环境要求
-
-```bash
-# 安装依赖
-cd ultralytics
-pip install -e .
-
-# 或直接安装 ultralytics
-pip install ultralytics>=8.2.0
-```
-
-## �� 数据集准备
-
-### 数据集结构
-
-```
-ultralytics/datasets/DUT/
-├── train/
-│   ├── images/
-│   │   ├── img_001.jpg
-│   │   └── ...
-│   └── labels/
-│       ├── img_001.txt
-│       └── ...
-├── val/
-│   ├── images/
-│   └── labels/
-└── test/
-    ├── images/
-    └── labels/
-```
-
-### 创建 DUT.yaml 配置文件
-
-在 `ultralytics/ultralytics/cfg/datasets/` 目录下创建 `DUT.yaml`：
-
-```yaml
-path: ../datasets/DUT  # 数据集根目录
-train: train/images     # 训练集图片路径
-val: val/images         # 验证集图片路径
-test: test/images       # 测试集图片路径
-
-# 类别定义
-names:
-  0: small_object  # 小目标类别
-
-# 类别数量
-nc: 1
-```
-
-## �� 训练与评估
-
-### 训练命令
-
-```bash
-# 使用默认参数训练
-cd ultralytics
-python train.py --model ultralytics/cfg/models/11/yolo11s_PPA_DASI.yaml \
-                --data ultralytics/cfg/datasets/DUT.yaml \
-                --epochs 150 \
-                --batch 32 \
-                --imgsz 640 \
-                --optimizer Adam \
-                --device 0
-
-# 恢复训练
-python train.py --resume runs/detect/train89/weights/last.pt
-```
-
-### 关键训练参数
-
-| 参数 | 值 | 说明 |
-|------|-----|------|
-| `--epochs` | 150 | 训练轮数 |
-| `--batch` | 32 | 批次大小 |
-| `--imgsz` | 640 | 输入图像尺寸 |
-| `--optimizer` | Adam | 优化器 |
-| `--device` | 0 | GPU 设备编号 |
-| `--lr0` | 0.001 | 初始学习率 |
-| `--close_mosaic` | 10 | 最后 10 轮关闭 Mosaic 增强 |
-
-### 评估命令
-
-```bash
-# 验证模型
-python val.py --model runs/detect/train89/weights/best.pt \
-              --data ultralytics/cfg/datasets/DUT.yaml
-
-# 生成混淆矩阵和指标报告
-python val.py --model runs/detect/train89/weights/best.pt \
-              --data ultralytics/cfg/datasets/DUT.yaml \
-              --save_json
-```
-
-## �� 推理预测
-
-```bash
-# 单张图片推理
-python predict.py --model runs/detect/train89/weights/best.pt \
-                  --source test.jpg \
-                  --save-crop
-
-# 批量图片推理
-python predict.py --model runs/detect/train89/weights/best.pt \
-                  --source test_images/ \
-                  --save-txt
-
-# 视频推理
-python predict.py --model runs/detect/train89/weights/best.pt \
-                  --source input.mp4 \
-                  --save-video
-```
-
-## ⚠️ 重要说明
-
-### 数据集配置
-
-使用前请确保已创建 `ultralytics/ultralytics/cfg/datasets/DUT.yaml` 数据集配置文件，并根据实际数据集路径进行修改。
-
-### 权重文件
-
-训练结果权重保存在 `ultralytics/runs/weights/` 目录：
-- `best.pt`: 验证集性能最佳的权重
-- `last.pt`: 最后一轮训练的权重
-
-### 训练参数记录
-
-`ultralytics/runs/args.yaml` 文件记录了训练时的所有参数配置，路径已修改为相对路径便于共享。
-
-## �� 模型架构
-
-```
-输入图像 (640x640)
-        \u2193
-    Backbone
-        \u251c\u2500\u2500 Conv + PPA (P1/2)
-        \u251c\u2500\u2500 C3k2 + PPA (P2/4)
-        \u251c\u2500\u2500 C3k2 + PPA (P3/8)
-        \u251c\u2500\u2500 C3k2 (P4/16)
-        \u2514\u2500\u2500 C3k2 + SPPF + C2PSA (P5/32)
-        \u2193
-    Neck (ASFF + DASI)
-        \u251c\u2500\u2500 ASFF2 (P3-P4 融合)
-        \u251c\u2500\u2500 ASFF3 (P3-P5 融合)
-        \u2514\u2500\u2500 DASI (动态尺度交互)
-        \u2193
-    Head (Detect)
-        \u2514\u2500\u2500 输出检测结果
-```
-
-## �� 训练结果
-
-训练过程中生成的可视化结果保存在 `ultralytics/runs/` 目录：
-- `results.png`: 训练损失曲线
-- `F1_curve.png`: F1 曲线
-- `PR_curve.png`: PR 曲线
-- `train_batch*.jpg`: 训练批次可视化
-- `val_batch*_labels.jpg`: 验证集标签可视化
-- `val_batch*_pred.jpg`: 验证集预测结果可视化
-
-## �� 引用
-
-如果您在研究中使用了本项目，请引用：
-
-```bibtex
-@article{DPAF-YOLO,
-  title={DPAF-YOLO: Position-Priority Attention with Dynamic Adaptive Scale Interaction for Small Object Detection},
-  author={Your Name},
-  journal={arXiv preprint arXiv:XXXX.XXXXX},
-  year={2024}
-}
-```
-
-## �� 许可证
-
-本项目基于 [AGPL-3.0](ultralytics/LICENSE) 许可证。
+This project is licensed under the [AGPL-3.0](ultralytics/LICENSE) license. A Detail-Preserving Asymptotic Feature Fusion Network for Small UAV Detection in Low-Altitude Optical Remote Sensing
